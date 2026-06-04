@@ -1,0 +1,1682 @@
+/* ==========================================================================
+   Neo-Bank ATM Simulator Design Stylesheet
+   ========================================================================== */
+
+/* 1. Global Reset & Theme Variables */
+:root {
+    --bg-main: hsl(222, 47%, 8%);
+    --bg-card: hsla(223, 47%, 12%, 0.6);
+    --atm-bezel: hsl(222, 25%, 15%);
+    --atm-bezel-border: hsl(222, 20%, 25%);
+    --atm-metal: linear-gradient(135deg, hsl(220, 15%, 25%) 0%, hsl(220, 10%, 15%) 100%);
+    --primary: hsl(180, 100%, 45%); /* Cyan/Teal glow */
+    --primary-dim: hsla(180, 100%, 45%, 0.15);
+    --secondary: hsl(265, 85%, 60%); /* Purple */
+    --accent: hsl(150, 85%, 45%); /* Success Green */
+    --accent-dim: hsla(150, 85%, 45%, 0.15);
+    --warning: hsl(35, 100%, 50%); /* Amber warning */
+    --danger: hsl(345, 90%, 55%); /* Crimson cancel */
+    --danger-dim: hsla(345, 90%, 55%, 0.15);
+    --text-main: hsl(210, 30%, 95%);
+    --text-muted: hsl(210, 15%, 65%);
+    --glass-border: hsla(210, 30%, 95%, 0.08);
+    --shadow-premium: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
+    --font-stack: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+}
+
+body {
+    background-color: var(--bg-main);
+    background-image: 
+        radial-gradient(at 0% 0%, hsla(253, 50%, 15%, 0.4) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, hsla(180, 50%, 12%, 0.3) 0px, transparent 50%);
+    color: var(--text-main);
+    font-family: var(--font-stack);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-x: hidden;
+    padding: 20px;
+}
+
+/* ==========================================================================
+   2. Main Container Layout (Split-pane Sidebar / Main)
+   ========================================================================== */
+.app-container {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 30px;
+    width: 100%;
+    max-width: 1250px;
+    margin: auto;
+    align-items: center;
+}
+
+@media (max-width: 1024px) {
+    .app-container {
+        grid-template-columns: 1fr;
+        padding: 10px;
+    }
+}
+
+/* ==========================================================================
+   3. Sidebar & User Panel (Instructions, Wallet, Cards)
+   ========================================================================== */
+.sidebar {
+    background: var(--bg-card);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    box-shadow: var(--shadow-premium);
+    height: 100%;
+    min-height: 700px;
+    justify-content: space-between;
+}
+
+.brand-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+    color: var(--primary);
+    text-shadow: 0 0 10px var(--primary-dim);
+}
+
+.brand-badge i {
+    font-size: 1.3rem;
+}
+
+.user-profile-widget {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: hsla(210, 30%, 95%, 0.03);
+    padding: 12px;
+    border-radius: 16px;
+    border: 1px solid hsla(210, 30%, 95%, 0.03);
+}
+
+.user-profile-widget .avatar {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.user-meta h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.user-meta .user-tag {
+    font-size: 0.75rem;
+    color: var(--primary);
+    font-weight: 500;
+}
+
+/* Wallet Card Styling */
+.wallet-card {
+    background: linear-gradient(135deg, hsla(220, 35%, 15%, 0.8) 0%, hsla(220, 20%, 8%, 0.8) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 10px 25px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.wallet-card::before {
+    content: '';
+    position: absolute;
+    top: -20%;
+    right: -10%;
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle, var(--primary-dim) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.wallet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+}
+
+.wallet-amount {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin: 10px 0;
+    font-feature-settings: "tnum";
+}
+
+.wallet-desc {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+    margin-bottom: 15px;
+}
+
+.sim-job-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--accent) 0%, hsl(140, 70%, 35%) 100%);
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    padding: 12px;
+    font-family: var(--font-stack);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+}
+
+.sim-job-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+}
+
+.sim-job-btn:active {
+    transform: translateY(0);
+}
+
+/* Instructions Panel */
+.instructions-card {
+    background: hsla(210, 30%, 95%, 0.02);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 15px;
+}
+
+.instructions-card h5 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.instructions-card h5 i {
+    color: var(--primary);
+}
+
+.instructions-card ol {
+    padding-left: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.instructions-card li strong {
+    color: var(--text-main);
+}
+
+/* ATM Card Physics Mockup */
+.card-holder-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 15px;
+    border-top: 1px dashed var(--glass-border);
+}
+
+.card-holder-area p {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--warning);
+}
+
+.atm-card-wrapper {
+    perspective: 800px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.atm-card {
+    width: 250px;
+    height: 150px;
+    background: linear-gradient(135deg, hsl(230, 80%, 20%) 0%, hsl(265, 80%, 15%) 50%, hsl(280, 80%, 10%) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 15px;
+    position: relative;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    cursor: pointer;
+    transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+    transform-style: preserve-3d;
+}
+
+.atm-card:hover {
+    transform: translateY(-8px) rotateY(-5deg) rotateX(10deg);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 15px var(--primary-dim);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.atm-card-chip {
+    width: 32px;
+    height: 24px;
+    background: linear-gradient(135deg, hsl(45, 90%, 65%) 0%, hsl(40, 70%, 45%) 100%);
+    border-radius: 4px;
+    position: absolute;
+    top: 25px;
+    left: 20px;
+    border: 0.5px solid rgba(0,0,0,0.1);
+}
+
+.atm-card-logo {
+    position: absolute;
+    top: 22px;
+    right: 20px;
+    font-weight: 800;
+    font-size: 0.95rem;
+    letter-spacing: 2px;
+    color: #fff;
+    font-style: italic;
+    text-shadow: 0 0 5px rgba(255,255,255,0.3);
+}
+
+.atm-card-number {
+    position: absolute;
+    top: 75px;
+    left: 20px;
+    color: #fff;
+    font-size: 0.95rem;
+    letter-spacing: 2px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    font-family: monospace;
+}
+
+.atm-card-holder {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 1px;
+}
+
+/* Card Ejected / Inserted animation bindings */
+.atm-card.inserted {
+    transform: translateY(-250px) rotateX(75deg) scale(0.4) rotateZ(-10deg);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.card-hint {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+    animation: flashHint 2s infinite;
+}
+
+@keyframes flashHint {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+/* ==========================================================================
+   4. ATM Terminal Shell & Construction (Frame, Console)
+   ========================================================================== */
+.atm-terminal-wrapper {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.atm-terminal {
+    background: var(--atm-metal);
+    border: 6px solid hsl(220, 10%, 10%);
+    border-radius: 36px;
+    padding: 30px;
+    width: 100%;
+    max-width: 750px;
+    box-shadow: 
+        var(--shadow-premium),
+        inset 0 2px 5px rgba(255,255,255,0.1),
+        inset 0 -5px 15px rgba(0,0,0,0.8);
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Metallic lines */
+.atm-terminal::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent);
+    transform: skewX(-30deg);
+    pointer-events: none;
+}
+
+/* ATM Header Banner */
+.atm-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 10px;
+    border-bottom: 2px solid hsl(220, 10%, 12%);
+}
+
+.atm-branding {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-main);
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    font-size: 0.95rem;
+}
+
+.atm-branding .logo-icon {
+    color: var(--primary);
+    font-size: 1.1rem;
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.pulse-dot {
+    width: 6px;
+    height: 6px;
+    background-color: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--accent);
+    animation: pulseGlow 1.5s infinite;
+}
+
+@keyframes pulseGlow {
+    0%, 100% { transform: scale(1); opacity: 0.6; }
+    50% { transform: scale(1.3); opacity: 1; }
+}
+
+/* ==========================================================================
+   5. ATM Bezel & Screen (Digital Interface UI)
+   ========================================================================== */
+.atm-screen-bezel {
+    background: var(--atm-bezel);
+    border: 3px solid var(--atm-bezel-border);
+    border-radius: 20px;
+    padding: 16px;
+    box-shadow: 
+        inset 0 4px 10px rgba(0,0,0,0.8),
+        0 4px 10px rgba(0,0,0,0.3);
+    position: relative;
+}
+
+.bezel-screw {
+    width: 6px;
+    height: 6px;
+    background: hsl(220, 5%, 35%);
+    border-radius: 50%;
+    position: absolute;
+    box-shadow: inset 1px 1px 1px rgba(0,0,0,0.8);
+}
+
+.bezel-screw.top-left { top: 6px; left: 6px; }
+.bezel-screw.top-right { top: 6px; right: 6px; }
+.bezel-screw.bottom-left { bottom: 6px; left: 6px; }
+.bezel-screw.bottom-right { bottom: 6px; right: 6px; }
+
+/* Screen Glass Panel */
+.atm-screen {
+    background: hsl(224, 56%, 6%);
+    border-radius: 12px;
+    height: 380px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid hsla(180, 100%, 45%, 0.15);
+    box-shadow: 
+        inset 0 0 30px rgba(0,0,0,0.95),
+        0 0 10px rgba(0,255,255,0.03);
+}
+
+/* Generic Screen view container */
+.screen-view {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    animation: screenFadeIn 0.3s ease-out;
+}
+
+.hidden {
+    display: none !important;
+}
+
+@keyframes screenFadeIn {
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* 5a. Screen 1: Idle Screen styles */
+.idle-screen {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.glowing-orb {
+    position: absolute;
+    width: 250px;
+    height: 250px;
+    background: radial-gradient(circle, rgba(0, 255, 255, 0.08) 0%, transparent 70%);
+    pointer-events: none;
+    animation: orbMove 10s infinite alternate;
+}
+
+@keyframes orbMove {
+    0% { transform: translate(-20px, -20px); }
+    100% { transform: translate(20px, 20px); }
+}
+
+.insert-prompt-icon {
+    font-size: 3.5rem;
+    color: var(--primary);
+    text-shadow: 0 0 20px var(--primary-dim);
+    margin-bottom: 20px;
+    animation: pulseIcon 2s infinite ease-in-out;
+}
+
+@keyframes pulseIcon {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+}
+
+.idle-screen h2 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+}
+
+.idle-screen p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    max-width: 320px;
+    line-height: 1.5;
+}
+
+.insert-badge {
+    margin-top: 25px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--primary-dim);
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    border-radius: 30px;
+    padding: 8px 18px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--primary);
+    letter-spacing: 1px;
+}
+
+.insert-badge i {
+    animation: arrowBounce 1s infinite alternate;
+}
+
+@keyframes arrowBounce {
+    0% { transform: translateY(-2px); }
+    100% { transform: translateY(2px); }
+}
+
+/* 5b. Screen 2: PIN Screen styles */
+.pin-screen {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.pin-screen h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.pin-screen p {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 25px;
+}
+
+.pin-entry-container {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    justify-content: center;
+}
+
+.pin-dot {
+    width: 18px;
+    height: 18px;
+    border: 2px solid hsl(210, 15%, 35%);
+    border-radius: 50%;
+    transition: all 0.15s ease;
+}
+
+.pin-dot.filled {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    box-shadow: 0 0 10px var(--primary);
+    transform: scale(1.15);
+}
+
+.pin-error-msg {
+    font-size: 0.8rem;
+    color: var(--danger);
+    height: 20px;
+    font-weight: 600;
+}
+
+.security-warning {
+    margin-top: 25px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+.security-warning i {
+    color: var(--warning);
+}
+
+.shake {
+    animation: shakeEffect 0.35s ease;
+}
+
+@keyframes shakeEffect {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-8px); }
+    40%, 80% { transform: translateX(8px); }
+}
+
+/* 5c. Screen 3: Dashboard Screen styles */
+.screen-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.client-name {
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.session-timer {
+    color: var(--text-muted);
+}
+
+.session-timer-text {
+    font-family: monospace;
+}
+
+.session-timer-text.low-time {
+    color: var(--danger);
+    font-weight: bold;
+    animation: flashHint 1s infinite;
+}
+
+/* Dashboard Account Cards Matrix */
+.dashboard-accounts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin: 15px 0;
+}
+
+.account-card {
+    border-radius: 12px;
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    border: 1px solid rgba(255,255,255,0.05);
+    position: relative;
+    overflow: hidden;
+}
+
+.account-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 100% 0%, rgba(255,255,255,0.03) 0%, transparent 60%);
+}
+
+.account-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255,255,255,0.15);
+}
+
+.card-checking {
+    background: linear-gradient(135deg, hsl(200, 70%, 12%) 0%, hsl(210, 60%, 8%) 100%);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+.card-checking:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4), 0 0 10px rgba(0, 180, 255, 0.15);
+}
+
+.card-savings {
+    background: linear-gradient(135deg, hsl(270, 60%, 12%) 0%, hsl(280, 50%, 8%) 100%);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+.card-savings:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4), 0 0 10px rgba(180, 0, 255, 0.15);
+}
+
+.card-type-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+}
+
+.card-type-header i {
+    font-size: 0.8rem;
+    color: var(--primary);
+}
+
+.card-acc-num {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 5px;
+    font-family: monospace;
+}
+
+.balance-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+}
+
+.card-balance {
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: var(--text-main);
+    font-feature-settings: "tnum";
+}
+
+.card-balance.masked {
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+}
+
+.balance-toggle {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.8rem;
+    padding: 5px;
+    transition: color 0.15s ease;
+}
+
+.balance-toggle:hover {
+    color: var(--primary);
+}
+
+.card-fee-label {
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    margin-top: 5px;
+    border-top: 1px solid rgba(255,255,255,0.03);
+    padding-top: 5px;
+}
+
+/* Virtual ATM Screen Nav Navigation Bar */
+.screen-nav {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px;
+    background: hsla(220, 20%, 8%, 0.9);
+    border: 1px solid var(--glass-border);
+    padding: 6px;
+    border-radius: 8px;
+}
+
+.nav-btn {
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: var(--text-muted);
+    font-family: var(--font-stack);
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 8px 4px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+}
+
+.nav-btn i {
+    font-size: 0.85rem;
+}
+
+.nav-btn:hover {
+    color: var(--primary);
+    background: hsla(180, 100%, 45%, 0.05);
+}
+
+.nav-btn.active {
+    color: var(--primary);
+    background: var(--primary-dim);
+    border: 1px solid rgba(0, 255, 255, 0.1);
+}
+
+.nav-btn-danger:hover {
+    color: var(--danger) !important;
+    background: var(--danger-dim) !important;
+}
+
+/* 5d. Screen 4: Transaction Panel Form layouts */
+.transaction-body {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: 10px 0;
+}
+
+.tx-meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.tx-form-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    align-items: center;
+    gap: 10px;
+}
+
+.form-row label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.form-control {
+    background: hsl(220, 20%, 8%);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    color: var(--text-main);
+    font-family: var(--font-stack);
+    font-size: 0.8rem;
+    padding: 8px 12px;
+    width: 100%;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 8px var(--primary-dim);
+}
+
+.input-amount {
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: var(--primary);
+    font-feature-settings: "tnum";
+}
+
+.tx-error-msg {
+    font-size: 0.7rem;
+    color: var(--danger);
+    min-height: 18px;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+/* Quick Cash grid selection */
+.quick-cash-panel {
+    border-top: 1px solid var(--glass-border);
+    padding-top: 8px;
+}
+
+.quick-title {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.quick-cash-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+}
+
+.quick-cash-btn {
+    background: hsla(210, 30%, 95%, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 6px;
+    color: var(--text-main);
+    font-family: var(--font-stack);
+    font-weight: 600;
+    font-size: 0.75rem;
+    padding: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.quick-cash-btn:hover {
+    background: var(--primary-dim);
+    color: var(--primary);
+    border-color: rgba(0, 255, 255, 0.2);
+}
+
+/* Buttons in forms */
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.form-back-btn {
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    color: var(--text-muted);
+    font-family: var(--font-stack);
+    font-weight: 600;
+    font-size: 0.8rem;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.form-back-btn:hover {
+    color: var(--text-main);
+    background: hsla(210, 30%, 95%, 0.05);
+}
+
+.form-submit-btn {
+    background: linear-gradient(135deg, var(--primary) 0%, hsl(190, 80%, 35%) 100%);
+    border: none;
+    color: #000;
+    font-family: var(--font-stack);
+    font-weight: 700;
+    font-size: 0.8rem;
+    padding: 8px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 10px rgba(0, 255, 255, 0.15);
+    flex-grow: 1;
+}
+
+.form-submit-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 15px rgba(0, 255, 255, 0.3);
+}
+
+/* 5e. Screen 5: Transaction History list */
+.history-table-container {
+    flex-grow: 1;
+    overflow-y: auto;
+    margin: 10px 0;
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    background: hsl(220, 20%, 4%);
+}
+
+/* Scrollbar styling inside Screen */
+.history-table-container::-webkit-scrollbar {
+    width: 6px;
+}
+.history-table-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+.history-table-container::-webkit-scrollbar-thumb {
+    background: hsla(210, 30%, 95%, 0.1);
+    border-radius: 10px;
+}
+.history-table-container::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-dim);
+}
+
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.7rem;
+    text-align: left;
+}
+
+.history-table th {
+    background: hsl(220, 20%, 7%);
+    padding: 8px 10px;
+    font-weight: 600;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--glass-border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.history-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid hsla(210, 30%, 95%, 0.02);
+}
+
+.empty-table {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 20px !important;
+}
+
+.tx-type-label {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.label-deposit { background: var(--accent-dim); color: var(--accent); }
+.label-withdraw { background: var(--danger-dim); color: var(--danger); }
+.label-transfer_in { background: var(--accent-dim); color: var(--accent); }
+.label-transfer_out { background: var(--danger-dim); color: var(--danger); }
+.label-interest { background: var(--accent-dim); color: var(--accent); }
+.label-fee { background: hsla(35, 100%, 50%, 0.15); color: var(--warning); }
+
+.tx-desc-cell {
+    font-weight: 500;
+}
+.tx-fee-note {
+    font-size: 0.55rem;
+    color: var(--warning);
+    margin-top: 1px;
+}
+
+.tx-positive { color: var(--accent); }
+.tx-negative { color: var(--danger); }
+
+.tx-date-cell {
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.filter-wrapper select {
+    background: hsl(220, 20%, 8%);
+    border: 1px solid var(--glass-border);
+    color: var(--text-main);
+    font-family: var(--font-stack);
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    outline: none;
+}
+
+/* 5f. Screen 6: Account Management screen */
+.manage-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    flex-grow: 1;
+    margin: 10px 0;
+    overflow-y: auto;
+}
+
+.manage-info-panel, .manage-form-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.manage-grid h5 {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 4px;
+}
+
+.info-card {
+    background: hsla(210, 30%, 95%, 0.02);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 0.65rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+
+.info-card strong {
+    color: var(--text-main);
+}
+
+.settings-form-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.mini-form {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+}
+
+.settings-error-msg {
+    font-size: 0.65rem;
+    color: var(--danger);
+    min-height: 15px;
+}
+.settings-success-msg {
+    font-size: 0.65rem;
+    color: var(--accent);
+    min-height: 15px;
+}
+
+.settings-submit-btn {
+    background: hsla(210, 30%, 95%, 0.05);
+    border: 1px solid var(--glass-border);
+    color: var(--text-main);
+    border-radius: 6px;
+    padding: 6px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--font-stack);
+    transition: all 0.15s ease;
+}
+
+.settings-submit-btn:hover {
+    background: var(--primary-dim);
+    color: var(--primary);
+    border-color: rgba(0, 255, 255, 0.2);
+}
+
+.simulator-controls-panel {
+    margin-top: 8px;
+    border-top: 1px dashed var(--glass-border);
+    padding-top: 8px;
+}
+
+.sim-help-txt {
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+}
+
+.sim-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--secondary) 0%, hsl(265, 70%, 35%) 100%);
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    padding: 8px;
+    font-family: var(--font-stack);
+    font-size: 0.7rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 10px rgba(139, 92, 246, 0.15);
+}
+
+.sim-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 15px rgba(139, 92, 246, 0.3);
+}
+
+/* ==========================================================================
+   6. ATM Tactile Keypad Section (Mechanical Feel)
+   ========================================================================== */
+.atm-lower-console {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 20px;
+    border-top: 3px solid hsl(220, 10%, 12%);
+    padding-top: 20px;
+}
+
+@media (max-width: 600px) {
+    .atm-lower-console {
+        grid-template-columns: 1fr;
+    }
+}
+
+.keypad-container {
+    background: hsl(220, 10%, 12%);
+    border: 3px solid hsl(220, 8%, 18%);
+    border-radius: 16px;
+    padding: 15px;
+    box-shadow: 
+        inset 0 2px 4px rgba(255,255,255,0.05),
+        0 4px 8px rgba(0,0,0,0.5);
+}
+
+.keypad-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+.keypad-btn {
+    height: 48px;
+    border-radius: 8px;
+    border: 1px solid hsl(220, 5%, 28%);
+    background: linear-gradient(180deg, hsl(220, 5%, 25%) 0%, hsl(220, 5%, 16%) 100%);
+    color: hsl(210, 10%, 80%);
+    font-family: monospace;
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 
+        0 3px 0 hsl(220, 10%, 10%),
+        0 4px 6px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.08s ease;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.1);
+}
+
+.keypad-btn:hover {
+    background: linear-gradient(180deg, hsl(220, 5%, 28%) 0%, hsl(220, 5%, 18%) 100%);
+}
+
+.keypad-btn:active {
+    transform: translateY(2px);
+    box-shadow: 
+        0 1px 0 hsl(220, 10%, 10%),
+        0 2px 3px rgba(0,0,0,0.2);
+}
+
+.empty-btn {
+    opacity: 0.3;
+    pointer-events: none;
+    background: hsl(220, 5%, 15%);
+    border-color: transparent;
+    box-shadow: none;
+}
+
+/* Color Key Buttons */
+.key-action-cancel {
+    background: linear-gradient(180deg, hsl(5, 75%, 45%) 0%, hsl(5, 75%, 35%) 100%);
+    border-color: hsl(5, 60%, 40%);
+    color: #fff;
+    font-family: var(--font-stack);
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-shadow: 0 -1px 0 rgba(0,0,0,0.3);
+}
+.key-action-cancel:hover {
+    background: linear-gradient(180deg, hsl(5, 75%, 48%) 0%, hsl(5, 75%, 38%) 100%);
+}
+
+.key-action-clear {
+    background: linear-gradient(180deg, hsl(45, 85%, 48%) 0%, hsl(45, 80%, 38%) 100%);
+    border-color: hsl(45, 70%, 40%);
+    color: #000;
+    font-family: var(--font-stack);
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+.key-action-clear:hover {
+    background: linear-gradient(180deg, hsl(45, 85%, 52%) 0%, hsl(45, 80%, 42%) 100%);
+}
+
+.key-action-enter {
+    background: linear-gradient(180deg, hsl(140, 75%, 40%) 0%, hsl(140, 75%, 30%) 100%);
+    border-color: hsl(140, 60%, 35%);
+    color: #fff;
+    font-family: var(--font-stack);
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-shadow: 0 -1px 0 rgba(0,0,0,0.3);
+}
+.key-action-enter:hover {
+    background: linear-gradient(180deg, hsl(140, 75%, 43%) 0%, hsl(140, 75%, 33%) 100%);
+}
+
+/* ==========================================================================
+   7. Mechanical Slots & Hardware Animations (Card, Receipt, Cash)
+   ========================================================================== */
+.slots-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.slot-widget {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.slot-label {
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+}
+
+.slot-slit {
+    height: 10px;
+    background: hsl(220, 10%, 4%);
+    border-radius: 4px;
+    box-shadow: 
+        inset 0 2px 3px rgba(0,0,0,0.8),
+        0 1px 1px rgba(255,255,255,0.05);
+    position: relative;
+}
+
+/* Card Slot custom green LED */
+.card-slot-wrapper {
+    position: relative;
+}
+
+.card-slit {
+    width: 100%;
+}
+
+.slot-led {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    position: absolute;
+    right: 15px;
+    top: -12px;
+    background-color: var(--danger);
+    box-shadow: 0 0 5px var(--danger);
+    transition: all 0.3s ease;
+}
+
+.card-slot-wrapper.active .slot-led {
+    background-color: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+    animation: pulseGlow 1s infinite alternate;
+}
+
+/* Receipt printed paper */
+.receipt-slit {
+    width: 100%;
+}
+
+#receipt-container {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.printed-receipt {
+    position: absolute;
+    top: 5px;
+    width: 85%;
+    background: #fdfdfd;
+    color: #111;
+    border-radius: 0 0 4px 4px;
+    padding: 15px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5), inset 0 2px 2px rgba(0,0,0,0.1);
+    font-family: monospace;
+    font-size: 0.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 5;
+    cursor: pointer;
+    border-top: 1px dashed #ccc;
+    
+    /* Ejection start state: hidden inside the machine */
+    transform: translateY(-80px);
+    opacity: 0;
+    transition: transform 1.2s cubic-bezier(0.1, 0.8, 0.2, 1), opacity 0.5s ease;
+}
+
+.printed-receipt.printed {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.printed-receipt.taken {
+    transform: translateY(120px) scale(0.9);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.receipt-header h4 {
+    text-align: center;
+    font-weight: 800;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+}
+
+.receipt-header p {
+    text-align: center;
+    font-size: 0.55rem;
+    color: #666;
+}
+
+.receipt-divider {
+    border-top: 1px dashed #444;
+    margin: 4px 0;
+}
+
+.receipt-row {
+    display: flex;
+    justify-content: space-between;
+}
+
+.receipt-row.bold {
+    font-weight: 800;
+    font-size: 0.65rem;
+}
+
+.upper {
+    text-transform: uppercase;
+}
+
+.receipt-footer {
+    text-align: center;
+    margin-top: 8px;
+    color: #555;
+    font-size: 0.55rem;
+}
+
+.receipt-footer small {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.5rem;
+    color: var(--secondary);
+    font-weight: bold;
+    animation: flashHint 1.5s infinite;
+}
+
+/* Modal wrapper for expanded receipt view */
+.receipt-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    animation: fadeInModal 0.25s ease-out;
+}
+
+@keyframes fadeInModal {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.receipt-modal-content {
+    position: relative;
+    max-width: 320px;
+    width: 90%;
+    animation: slideUpModal 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+@keyframes slideUpModal {
+    from { transform: translateY(40px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.receipt-modal-content .close-modal-btn {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 2.2rem;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.receipt-paper {
+    background: #fff;
+    color: #111;
+    border-radius: 8px;
+    padding: 25px;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8);
+    font-family: monospace;
+}
+
+.receipt-paper .printed-receipt {
+    position: static;
+    transform: none;
+    opacity: 1;
+    box-shadow: none;
+    padding: 0;
+    width: 100%;
+}
+
+.receipt-paper .receipt-header h4 {
+    font-size: 1rem;
+}
+.receipt-paper .receipt-row {
+    font-size: 0.75rem;
+}
+.receipt-paper .receipt-row.bold {
+    font-size: 0.85rem;
+}
+
+/* Cash Ejecting Dollar Bill Animation */
+.cash-slit {
+    width: 100%;
+    position: relative;
+}
+
+.dispensed-bill {
+    position: absolute;
+    width: 80%;
+    height: 70px;
+    background: linear-gradient(135deg, hsl(140, 45%, 45%) 0%, hsl(145, 50%, 35%) 100%);
+    border: 2px solid hsl(140, 30%, 55%);
+    border-radius: 6px;
+    left: 10%;
+    top: 5px;
+    z-index: 4;
+    cursor: pointer;
+    
+    /* Eject mechanics */
+    transform: translateY(-80px) rotateX(15deg);
+    opacity: 0;
+    transition: transform 1.0s cubic-bezier(0.1, 0.8, 0.3, 1), opacity 0.3s ease;
+    box-shadow: 
+        0 10px 20px rgba(0,0,0,0.4),
+        inset 0 0 10px rgba(255,255,255,0.1);
+}
+
+.dispensed-bill.ejected {
+    transform: translateY(-20px) rotateX(0deg);
+    opacity: 1;
+    animation: wobbleBill 1.5s infinite alternate ease-in-out;
+}
+
+@keyframes wobbleBill {
+    0% { transform: translateY(-20px) rotate(-1deg); }
+    100% { transform: translateY(-16px) rotate(1deg); }
+}
+
+.dispensed-bill.collected {
+    transform: translate(-150px, -150px) scale(0.3) rotate(-45deg);
+    opacity: 0;
+    transition: all 0.5s cubic-bezier(0.5, 0, 0.7, 0.4);
+}
+
+/* Design of dollar bill Face */
+.bill-face {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    border: 1px dashed rgba(255,255,255,0.2);
+    margin: 0;
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: hsl(140, 50%, 90%);
+}
+
+.bill-seal {
+    font-size: 1.8rem;
+    font-weight: 800;
+    opacity: 0.15;
+    position: absolute;
+}
+
+.bill-value {
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.2);
+}
+
+.bill-banner {
+    font-size: 0.45rem;
+    letter-spacing: 2px;
+    font-weight: 700;
+    opacity: 0.7;
+}
+
+.bill-value-corner {
+    position: absolute;
+    font-size: 0.55rem;
+    font-weight: bold;
+    top: 5px;
+    left: 5px;
+}
+
+/* ==========================================================================
+   8. Toast Notifications (Micro-Feedback)
+   ========================================================================== */
+.atm-toast {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    background: hsl(222, 47%, 15%);
+    border: 1px solid var(--primary);
+    border-radius: 12px;
+    padding: 16px 24px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.atm-toast::before {
+    content: '\f058'; /* FontAwesome check-circle */
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    color: var(--accent);
+    font-size: 1rem;
+}
+
+.atm-toast.toast-error {
+    border-color: var(--danger);
+}
+
+.atm-toast.toast-error::before {
+    content: '\f06a'; /* FontAwesome times-circle */
+    color: var(--danger);
+}
+
+.atm-toast.visible {
+    transform: translateY(0);
+    opacity: 1;
+}

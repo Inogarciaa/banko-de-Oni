@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banko de Oni</title>
+    <!-- Modern Premium Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main Style Sheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="app-container">
+
+        <!-- Sidebar: User Instructions & Wallet (User Context) -->
+        <aside class="sidebar" id="user-wallet-panel">
+            <div class="brand-badge">
+                <i class="fa-solid fa-building-columns"></i>
+                <span>Banko de Oni</span>
+            </div>
+
+            <div class="user-profile-widget">
+                <div class="avatar">
+                    <i class="fa-solid fa-user-tie"></i>
+                </div>
+                <div class="user-meta">
+                    <h4>Ino Garcia</h4>
+                    <span class="user-tag">VIP Client</span>
+                </div>
+            </div>
+
+            <div class="wallet-card">
+                <div class="wallet-header">
+                    <span>MY CASH WALLET</span>
+                    <i class="fa-solid fa-wallet"></i>
+                </div>
+                <div class="wallet-amount" id="wallet-cash-value">₱100.00</div>
+                <p class="wallet-desc">Simulates physical cash in your hand. Deposits subtract from here, withdrawals
+                    add here.</p>
+                <button class="sim-job-btn" id="btn-sim-wallet-add">
+                    <i class="fa-solid fa-hand-holding-dollar"></i> Earn ₱100 Cash (Salary Sim)
+                </button>
+            </div>
+
+            <div class="instructions-card">
+                <h5><i class="fa-solid fa-circle-info"></i> Simulator Instructions</h5>
+                <ol>
+                    <li>Click the <strong>ATM Card</strong> below to slide it into the card reader.</li>
+                    <li>Enter PIN <strong>1234</strong> using the keypad or keyboard.</li>
+                    <li>Toggle checking/savings balance visibility via the <i class="fa-solid fa-eye"></i> icon.</li>
+                    <li>Checking has a <strong>₱5.00 withdrawal fee</strong>. Savings has a <strong>4.0% annual interest
+                            rate</strong> with a <strong>₱100 minimum balance</strong> limit.</li>
+                    <li>Click the dispensed cash or receipt to take/collect it.</li>
+                </ol>
+            </div>
+
+            <!-- Card Holder Interactive Area -->
+            <div class="card-holder-area">
+                <p id="card-status-text">Card: Ejected</p>
+                <div class="atm-card-wrapper">
+                    <div class="atm-card" id="atm-card" title="Click to insert card into ATM">
+                        <div class="atm-card-chip"></div>
+                        <div class="atm-card-logo">Banko de Oni</div>
+                        <div class="atm-card-number">•••• •••• •••• 0509</div>
+                        <div class="atm-card-holder">Ino Garcia</div>
+                    </div>
+                </div>
+                <span class="card-hint">Click card to insert</span>
+            </div>
+        </aside>
+
+        <!-- Main Workspace: The Physical ATM Mockup -->
+        <main class="atm-terminal-wrapper">
+            <div class="atm-terminal">
+
+                <!-- Brand logo on ATM Header -->
+                <header class="atm-header">
+                    <div class="atm-branding">
+                        <i class="fa-solid fa-wallet logo-icon"></i>
+                        <span>Banko de Oni</span>
+                    </div>
+                    <div class="status-indicator">
+                        <span class="pulse-dot"></span> Online
+                    </div>
+                </header>
+
+                <!-- ATM Bezel & Touchscreen Screen Area -->
+                <div class="atm-screen-bezel">
+                    <div class="bezel-screw top-left"></div>
+                    <div class="bezel-screw top-right"></div>
+
+                    <!-- Digital Screen Glass -->
+                    <div class="atm-screen">
+
+                        <!-- 1. Screen Idle / Insert Card -->
+                        <div class="screen-view idle-screen" id="screen-idle">
+                            <div class="glowing-orb"></div>
+                            <div class="screen-content">
+                                <i class="fa-solid fa-credit-card insert-prompt-icon"></i>
+                                <h2>Welcome to Banko de Oni!</h2>
+                                <p>Please insert your bank card to begin your secure session.</p>
+                                <div class="insert-badge">
+                                    <i class="fa-solid fa-arrow-down"></i>
+                                    <span>INSERT CARD BELOW</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. PIN Entry Screen -->
+                        <div class="screen-view pin-screen hidden" id="screen-pin">
+                            <div class="screen-content">
+                                <h3>Enter Secure PIN</h3>
+                                <p>Enter your 4-digit secret key on the keypad or your keyboard.</p>
+
+                                <div class="pin-entry-container" id="pin-display">
+                                    <div class="pin-dot"></div>
+                                    <div class="pin-dot"></div>
+                                    <div class="pin-dot"></div>
+                                    <div class="pin-dot"></div>
+                                </div>
+
+                                <div class="pin-error-msg" id="pin-error"></div>
+
+                                <div class="security-warning">
+                                    <i class="fa-solid fa-shield-halved"></i>
+                                    <span>Warning: Screen is monitored for your protection</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. Dashboard / Home Screen -->
+                        <div class="screen-view dashboard-screen hidden" id="screen-dashboard">
+                            <!-- Screen Top Navigation -->
+                            <div class="screen-header-bar">
+                                <span class="client-name">Hello, <span id="user-name">Client</span></span>
+                                <span class="session-timer">Timeout: <span id="session-timer-text">2:00</span></span>
+                            </div>
+
+                            <!-- Screen Main Content: Checking & Savings accounts -->
+                            <div class="dashboard-accounts">
+
+                                <!-- Checking Card -->
+                                <div class="account-card card-checking" id="card-checking"
+                                    title="Open Checking Account Services">
+                                    <div class="card-type-header">
+                                        <span>CHECKING</span>
+                                        <i class="fa-solid fa-money-check-dollar"></i>
+                                    </div>
+                                    <div class="card-acc-num" id="checking-acc-num">•••• 0000</div>
+                                    <div class="balance-row">
+                                        <div class="card-balance" id="checking-balance">₱0.00</div>
+                                        <button class="balance-toggle" id="toggle-checking-eye"
+                                            title="Show/Hide Balance">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div class="card-fee-label">Withdraw Fee: ₱5.00</div>
+                                </div>
+
+                                <!-- Savings Card -->
+                                <div class="account-card card-savings" id="card-savings"
+                                    title="Open Savings Account Services">
+                                    <div class="card-type-header">
+                                        <span>SAVINGS</span>
+                                        <i class="fa-solid fa-piggy-bank"></i>
+                                    </div>
+                                    <div class="card-acc-num" id="savings-acc-num">•••• 0000</div>
+                                    <div class="balance-row">
+                                        <div class="card-balance" id="savings-balance">₱0.00</div>
+                                        <button class="balance-toggle" id="toggle-savings-eye"
+                                            title="Show/Hide Balance">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div class="card-fee-label">Interest: 4.0% p.a. (Min: ₱100)</div>
+                                </div>
+
+                            </div>
+
+                            <!-- ATM Virtual Screen Nav Menu -->
+                            <nav class="screen-nav">
+                                <button class="nav-btn active" id="nav-dashboard">
+                                    <i class="fa-solid fa-house"></i> Dashboard
+                                </button>
+                                <button class="nav-btn" id="nav-checking">
+                                    <i class="fa-solid fa-money-bill-transfer"></i> Checking
+                                </button>
+                                <button class="nav-btn" id="nav-savings">
+                                    <i class="fa-solid fa-chart-line"></i> Savings
+                                </button>
+                                <button class="nav-btn" id="nav-history">
+                                    <i class="fa-solid fa-list"></i> History
+                                </button>
+                                <button class="nav-btn" id="nav-manage">
+                                    <i class="fa-solid fa-sliders"></i> Manage
+                                </button>
+                                <button class="nav-btn nav-btn-danger" id="nav-logout">
+                                    <i class="fa-solid fa-right-from-bracket"></i> Exit
+                                </button>
+                            </nav>
+                        </div>
+
+                        <!-- 4. Transaction Operations Panel -->
+                        <div class="screen-view transaction-screen hidden" id="screen-transaction">
+                            <div class="screen-header-bar">
+                                <span class="client-name" id="tx-title">Checking Services</span>
+                                <span class="session-timer"><i class="fa-solid fa-coins"></i></span>
+                            </div>
+
+                            <div class="transaction-body">
+                                <div class="tx-meta" id="tx-acc-details">Checking Account: •••• 5002</div>
+
+                                <form id="tx-form" class="tx-form-layout">
+
+                                    <div class="form-row">
+                                        <label for="tx-type-select">Select Operation:</label>
+                                        <div class="custom-select-wrapper">
+                                            <select id="tx-type-select" class="form-control">
+                                                <option value="withdraw">Cash Withdrawal</option>
+                                                <option value="deposit">Cash Deposit</option>
+                                                <option value="transfer">Fund Transfer</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-row hidden" id="tx-target-acc-container">
+                                        <label for="tx-target-acc-select">Transfer To:</label>
+                                        <select id="tx-target-acc-select" class="form-control">
+                                            <!-- Dynamically populated -->
+                                        </select>
+                                    </div>
+
+                                    <div class="form-row">
+                                        <label for="tx-input-amount">Amount (₱):</label>
+                                        <input type="number" id="tx-input-amount" step="100"
+                                            placeholder="Min ₱200 (in 100s)..." class="form-control input-amount" min="200">
+                                    </div>
+
+                                    <div class="tx-error-msg" id="tx-error"></div>
+
+                                    <!-- Quick cash buttons (only displayed for withdrawals) -->
+                                    <div class="quick-cash-panel" id="tx-quick-withdrawal">
+                                        <span class="quick-title">Quick Cash Options:</span>
+                                        <div class="quick-cash-grid">
+                                            <button type="button" class="quick-cash-btn" data-amount="200">₱200</button>
+                                            <button type="button" class="quick-cash-btn" data-amount="500">₱500</button>
+                                            <button type="button" class="quick-cash-btn" data-amount="1000">₱1000</button>
+                                            <button type="button" class="quick-cash-btn" data-amount="2000">₱2000</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-actions">
+                                        <button type="button" class="form-back-btn"
+                                            onclick="atm.showScreen('screen-dashboard')">Back</button>
+                                        <button type="submit" class="form-submit-btn" id="tx-action-button">Process
+                                            Withdrawal</button>
+                                    </div>
+
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- 5. Transaction Statement Screen -->
+                        <div class="screen-view history-screen hidden" id="screen-history">
+                            <div class="screen-header-bar">
+                                <span class="client-name">Transaction History Logs</span>
+                                <div class="filter-wrapper">
+                                    <select id="history-filter" class="table-filter">
+                                        <option value="all">All Accounts</option>
+                                        <option value="checking">Checking</option>
+                                        <option value="savings">Savings</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="history-table-container">
+                                <table class="history-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Type</th>
+                                            <th>Description</th>
+                                            <th>Amount</th>
+                                            <th>Balance</th>
+                                            <th>Date & Time</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="history-table-body">
+                                        <!-- Dynamically Populated -->
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="form-actions history-footer">
+                                <button type="button" class="form-back-btn"
+                                    onclick="atm.showScreen('screen-dashboard')">Return to Dashboard</button>
+                            </div>
+                        </div>
+
+                        <!-- 6. Account Management Settings Screen -->
+                        <div class="screen-view manage-screen hidden" id="screen-manage">
+                            <div class="screen-header-bar">
+                                <span class="client-name">Account Settings & Simulations</span>
+                                <span class="session-timer"><i class="fa-solid fa-gears"></i></span>
+                            </div>
+
+                            <div class="manage-grid">
+                                <!-- Col 1: Account info metadata -->
+                                <div class="manage-info-panel">
+                                    <h5>Account Profiles</h5>
+                                    <div class="info-card" id="checking-info">
+                                        <!-- checking status -->
+                                    </div>
+                                    <div class="info-card" id="savings-info">
+                                        <!-- savings status -->
+                                    </div>
+                                </div>
+
+                                <!-- Col 2: Change PIN form & simulated timers -->
+                                <div class="manage-form-panel">
+                                    <h5>Change ATM Security PIN</h5>
+                                    <form id="settings-form" class="settings-form-layout">
+                                        <div class="settings-row">
+                                            <input type="password" id="set-old-pin" placeholder="Current PIN"
+                                                class="form-control mini-form" maxlength="4">
+                                        </div>
+                                        <div class="settings-row">
+                                            <input type="password" id="set-new-pin" placeholder="New PIN"
+                                                class="form-control mini-form" maxlength="4">
+                                        </div>
+                                        <div class="settings-row">
+                                            <input type="password" id="set-confirm-pin" placeholder="Confirm New PIN"
+                                                class="form-control mini-form" maxlength="4">
+                                        </div>
+                                        <div class="settings-error-msg" id="settings-error"></div>
+                                        <div class="settings-success-msg" id="settings-success"></div>
+                                        <button type="submit" class="settings-submit-btn">Update PIN</button>
+                                    </form>
+
+                                    <div class="simulator-controls-panel">
+                                        <h5>Simulation Acceleration</h5>
+                                        <p class="sim-help-txt">Simulates time flow to test interest accrual on Savings.
+                                        </p>
+                                        <button class="sim-btn" id="btn-sim-interest">
+                                            <i class="fa-solid fa-clock-rotate-left"></i> Apply Interest (1 Month Sim)
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-actions manage-footer">
+                                <button type="button" class="form-back-btn"
+                                    onclick="atm.showScreen('screen-dashboard')">Back</button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="bezel-screw bottom-left"></div>
+                    <div class="bezel-screw bottom-right"></div>
+                </div>
+
+                <!-- ATM Physical Slots & Input Area (Keypad + Cash Slot + Card Slot + Receipt Slot) -->
+                <div class="atm-lower-console">
+
+                    <!-- Left Console Element: Physical Numeric Tactile Keypad -->
+                    <div class="keypad-container">
+                        <div class="keypad-grid" id="physical-keypad">
+                            <!-- Row 1 -->
+                            <button class="keypad-btn num-key" data-key="1">1</button>
+                            <button class="keypad-btn num-key" data-key="2">2</button>
+                            <button class="keypad-btn num-key" data-key="3">3</button>
+                            <button class="keypad-btn key-action-cancel" data-key="cancel">CANCEL</button>
+
+                            <!-- Row 2 -->
+                            <button class="keypad-btn num-key" data-key="4">4</button>
+                            <button class="keypad-btn num-key" data-key="5">5</button>
+                            <button class="keypad-btn num-key" data-key="6">6</button>
+                            <button class="keypad-btn key-action-clear" data-key="clear">CLEAR</button>
+
+                            <!-- Row 3 -->
+                            <button class="keypad-btn num-key" data-key="7">7</button>
+                            <button class="keypad-btn num-key" data-key="8">8</button>
+                            <button class="keypad-btn num-key" data-key="9">9</button>
+                            <button class="keypad-btn key-action-enter" data-key="enter">ENTER</button>
+
+                            <!-- Row 4 -->
+                            <button class="keypad-btn num-key empty-btn" disabled></button>
+                            <button class="keypad-btn num-key" data-key="0">0</button>
+                            <button class="keypad-btn num-key empty-btn" disabled></button>
+                            <button class="keypad-btn num-key empty-btn" disabled></button>
+                        </div>
+                    </div>
+
+                    <!-- Right Console Element: Physical Slots -->
+                    <div class="slots-container">
+
+                        <!-- 1. Card Reader Slot -->
+                        <div class="slot-widget card-slot-widget">
+                            <div class="slot-label">CARD READER</div>
+                            <div class="card-slot-wrapper" id="card-slot-wrapper">
+                                <div class="slot-slit card-slit" id="card-slot"></div>
+                                <div class="slot-led card-led"></div>
+                            </div>
+                        </div>
+
+                        <!-- 2. Receipt Slot -->
+                        <div class="slot-widget receipt-slot-widget">
+                            <div class="slot-label">RECEIPT PRINTER</div>
+                            <div class="slot-wrapper">
+                                <div class="slot-slit receipt-slit" id="receipt-printer"></div>
+                                <!-- Receipt paper container that slides out -->
+                                <div id="receipt-container"></div>
+                            </div>
+                        </div>
+
+                        <!-- 3. Cash Dispenser Slot -->
+                        <div class="slot-widget cash-slot-widget">
+                            <div class="slot-label">CASH DISPENSER</div>
+                            <div class="slot-wrapper">
+                                <div class="slot-slit cash-slit" id="cash-dispenser"></div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </main>
+
+    </div>
+
+    <!-- Script File -->
+    <script src="app.js"></script>
+</body>
+
+</html>
